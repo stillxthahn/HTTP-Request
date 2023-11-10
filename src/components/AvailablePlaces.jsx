@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Places from "./Places.jsx";
 import Error from "./Error.jsx";
+import { sortPlacesByDistance } from "../loc.js";
 const places = localStorage.getItem("places");
 
 export default function AvailablePlaces({ onSelectPlace }) {
@@ -31,7 +32,17 @@ export default function AvailablePlaces({ onSelectPlace }) {
     if (!res.ok) {
      throw new Error("Failed to fetch places");
     }
-    setAvailablePlaces(resData.places);
+
+    //TRANSFORM FETCH DATA
+    navigator.geolocation.getCurrentPosition((position) => {
+     const sortedPlaces = sortPlacesByDistance(
+      resData.places,
+      position.coords.latitude,
+      position.coords.longitude
+     );
+     setAvailablePlaces(resData.places);
+     setIsFetching(false);
+    });
    } catch (error) {
     //...
     setError({
