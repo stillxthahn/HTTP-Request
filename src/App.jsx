@@ -39,7 +39,7 @@ function App() {
   });
   //SENDING DATA WITH POST REQUESTS
 
-  //USING OPTIMISTIC UPDATING
+  //USING OPTIMISTIC UPDATING -> UPDATE THE STATE FIRST THEN SEND HTTP REQUEST
   try {
    await updateUserPlaces([selectedPlace, ...userPlaces]);
   } catch (error) {
@@ -50,13 +50,28 @@ function App() {
   }
  }
 
- const handleRemovePlace = useCallback(async function handleRemovePlace() {
-  setUserPlaces((prevPickedPlaces) =>
-   prevPickedPlaces.filter((place) => place.id !== selectedPlace.current.id)
-  );
+ const handleRemovePlace = useCallback(
+  async function handleRemovePlace() {
+   setUserPlaces((prevPickedPlaces) =>
+    prevPickedPlaces.filter((place) => place.id !== selectedPlace.current.id)
+   );
 
-  setModalIsOpen(false);
- }, []);
+   //DELETING DATA VIA DELETE HTTP REQUEST
+   try {
+    await updateUserPlaces(
+     userPlaces.filter((place) => place.id !== selectedPlace.current.id)
+    );
+   } catch (error) {
+    setUserPlaces(userPlaces);
+    setErrorUpdatingPlaces({
+     message: error.message || "FAILED TO DELETE PLACE",
+    });
+   }
+
+   setModalIsOpen(false);
+  },
+  [userPlaces]
+ );
 
  function handleError() {
   setErrorUpdatingPlaces(null);
